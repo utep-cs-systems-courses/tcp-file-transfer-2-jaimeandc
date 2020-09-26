@@ -15,7 +15,7 @@ switchesVarDefaults = (
     (('-?', '--usage'), "usage", False), #boolean (set if present)
     )
 
-progname = "fileClient" 
+progname = "framedClient" 
 paramMap = params.parseParams(switchesVarDefaults)
 
 server, usage, debug = paramMap["server"], paramMap["usage"], paramMap["debug"]
@@ -42,30 +42,33 @@ if s is None:
 
 s.connect(addrPort)
 sentFiles = []
-files = ["testfile.txt", "file1.txt", "file2.txt", "file3.txt"]
+files = ["testfile.txt", "file1.txt", "emptyfile.txt", "file2.txt", "file3.txt", "file3.txt", "nonexistentFile.txt"]
 
+def is_empty_file(filename):
+    return os.path.isfile(filename) and os.path.getsize(filename) > 0
 
 for file in files:
-    #while not path.exists(file): ##Check if file exist
-    #    print("Sorry could not file '%s'" % file)
-    #    f.close()
-    #    pass
-    if file in sentFiles: ## check if file has already been sent
-        print("Tried sending '%s' but it already exist in the server." % file)
-        
+    if is_empty_file(file) == False:
+        print("'%s' did not send because it is an empty file" % file)
+        pass
     else:
-        print("Sending File %s to Server:" % file)
-        framedSend(s, str.encode(file),debug)
-        sentFiles.append(file) ## add filename to sentFile list
-        with open(file, "r") as f:
-            if os.stat(file).st_size == 0: ## check if file is empty
-                print('%s is empty file\n' % file)
+        if file in sentFiles: ## check file has been send already.
+            print("'%s' has already been sent to server." % file)
+            pass
+        else: ## send file to server
+            print("Sending File %s to Server:" % file)
+            framedSend(s, str.encode(file),debug)
+            sentFiles.append(file) ## add filename to sentFile list
+            try: ## try to open file but handle if file does not exist
+                with open(file, "r") as f: ## open file
+                    for line in f:
+                        framedSend(s, str.encode(line),debug)
+                        print("Server Received: ",framedReceive(s,debug))
+                    print("Server Coppied: '%s'\n" % file)
                 f.close()
-            else:
-                for line in f:
-                    framedSend(s, str.encode(line),debug)
-                    print("Server Received: ",framedReceive(s,debug))
-                print("Server Coppied: '%s'\n" % file)
-                f.close()            
+            except IOError:
+                print("'%s' could not be open because it dosnt exist" % file)
+
+f.close()
 s.close() ## no more files to send close socket.
         

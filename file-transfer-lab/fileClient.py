@@ -42,29 +42,33 @@ if s is None:
 
 s.connect(addrPort)
 sentFiles = []
-files = ["testfile.txt", "file1.txt", "emptyfile.txt", "file2.txt", "file3.txt", "file3.txt", "nonexistentFile.txt"]
+files = ["testfile.txt", "file1.txt", "emptyfile.txt", "file3.txt", "file1.txt", "nonexistentFile.txt","code.py"]
+
 
 def is_empty_file(filename):
     return os.path.isfile(filename) and os.path.getsize(filename) > 0
 
 for file in files:
     if is_empty_file(file) == False:
-        print("'%s' did not send because it is an empty file" % file)
+        print("'%s' did not send because it is an empty file\n" % file)
         pass
     else:
         if file in sentFiles: ## check file has been send already.
-            print("'%s' has already been sent to server." % file)
+            print("'%s' tried to send but already has been sent to server." % file)
             pass
         else: ## send file to server
             print("Sending File %s to Server:" % file)
-            framedSend(s, str.encode(file),debug)
-            sentFiles.append(file) ## add filename to sentFile list
+            sentFiles.append(file)## add filename to sent list
+            framedSend(s, str.encode(file),debug)##Send Filename to server
+            #sentFiles.append(file) ## add filename to sentFile list
             try: ## try to open file but handle if file does not exist
-                with open(file, "r") as f: ## open file
+                quitMsg = "exit"
+                with open(file) as f: ## open file
                     for line in f:
                         framedSend(s, str.encode(line),debug)
                         print("Server Received: ",framedReceive(s,debug))
                     print("Server Coppied: '%s'\n" % file)
+                framedSend(s,str.encode(quitMsg),debug)
                 f.close()
             except IOError:
                 print("'%s' could not be open because it dosnt exist" % file)

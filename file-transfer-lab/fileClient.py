@@ -40,35 +40,70 @@ if s is None:
     sys.exit(1)
 
 s.connect(addrPort)
-outfile = input("What file would you like to send ? ")# ask for file name
 
-if exists(outfile):
-    file = open(outfile,'rb')## if file exist open file
-    file_data = file.read()## read file
-    if len(file_data) == 0:## check for emtpy file
-        print("cant send empty file")
+file_name = input("Choose a file")
+if exists(file_name):
+    file = open(file_name, 'rb')
+    payload = file.read()
+    if len(payload) == 0:
+        print("Cant Send empty file")
         sys.exit(0)
-    else: ## file is not empty
-        framedSend(s,outfile.encode(),debug) ## send file name to check if exists in server
-        server_check = framedReceive(s,debug) ## wait for responce from server if file exists
-        server_check = server_check.decode()
-        if server_check == 'True':
-            print("File in server already")
+    else:
+        new_file_name = input("give that file a new name in server")
+        framedSend(s, new_file_name.encode(), debug)
+        file_exists = framedReceive(s,debug)
+        file_exists = file_exists.decode()
+        if file_exists == 'True':
+            print("That filename exist allready")
             sys.exit(0)
         else:
-            try: ##send non-duplicate file payload to server
-                framedSend(s, file_data, debug) ## ADDED ENCODE
+            try:
+                framedSend(s, payload,debug)
             except:
-                print("Connection to server lost...")
+                print("Lost connection with server while sending file contents")
                 sys.exit(0)
-            try: ##wait for done responce from server.
-                serverMsg = framedReceive(s,debug)
-                print("Server says: %s" % serverMsg.decode())
+            try:
+                framedReceive(s,debug)
             except:
-                print("Connection to server lost...")
+                print("Lost connection with server while receiving data")
+                sys.exit(0)
+else:
+    print("File Doesnt Exist")
+    sys.exit(0)
+                
+    
+
+
+#outfile = input("What file would you like to send ? ")# ask for file name
+#outfile = outfile.encode('utf-8')
+#if exists(outfile):
+#    file = open(outfile,'rb')## if file exist open file
+#    file_data = file.read()## read file
+#    if len(file_data) == 0:## check for emtpy file
+#        print("cant send empty file")
+#        sys.exit(0)
+#    else: ## file is not empty
+#        framedSend(s,outfile,debug) ## send file name to check if exists in server
+#        server_check = framedReceive(s,debug) ## wait for responce from server if file exists
+#        server_check = server_check.decode()
+#        if server_check == 'True':
+#            print("File in server already")
+#            sys.exit(0)
+#        else:
+#            try: ##send non-duplicate file payload to server
+#                print("will send at this point")
+#                #framedSend(s, file_data, debug) ## ADDED ENCODE
+#            except:
+#                print("Connection to server lost...")
+#                sys.exit(0)
+#            try: ##wait for done responce from server.
+#                serverMsg = framedReceive(s,debug)
+#                print("Server says: %s" % serverMsg.decode())
+#            except:
+#                print("Connection to server lost...")
             
                 
-#if exists(outfile):
+#if exidsts(outfile):
 #    file = open(outfile, 'rb')
 #    file_payload = file.read()
 #    if len(file_payload) == 0:
@@ -85,110 +120,12 @@ if exists(outfile):
 #            try:
 #                framedSend(s, file_payload, debug)
 #            except:
-#                print("Connection to server lost...")
+#                print("Connection to server lost sending file payload")
 #                sys.exit(0)
 #            try:
 #                framedReceive(s,debug)
-#            except:
-#                print("Connection to server lost...")
+##            except:
+#                print("Connection to server lost while receiving data")
 #else:
 #    print("File Does not exist try again later...")
-#    sys.exit(0)##
-
-
-
-
-
-
-#def len_check(file):
-#    return len(file.encode('utf-8'))#
-#
-#if exists(outfile):
-#    file = open(outfile, 'r')
-#    payload = file.read()
-#    if len(payload) == 0:
-#        print("Empty File did not send")
-#        sys.exit(0)
-#    else:
-#        framedSend(s, outfile.encode(), debug)
-#        framedSend(s, payload.encode(), debug)
-#        print("recived: ", framedReceive(s, debug))
-#        sys.exit(0)
-#else:
-#    print("file dosnt exit")
-#    sys.exit(0)
-
-
-
-
-#try:
-#    if is_empty_file(outfile) == False:
-#        print("Could not send because file is empty")
-#        sys.exit(0)
-#    framedSend(s, str.encode(outfile), debug) ## Send filename
-#    print("Sending: '%s'..." % outfile)#
-#    file = open(outfile, 'r') ## open file if not empty
-#    payload = file.read() ## read contents of file
-#except IOError:
-#    print("File does not exist")
-#if exists(outfile):
-#    file = open(outfile,'r')## if file exist open file
-#    file_data = file.read()## read contents of file
-#    if len(file_data) == 0:
-#        print("Did not send since Empty file.")
-#        sys.exit(0)
-#    else:
-#        print("Sending %s to Server" % outfile)
-#        framedSend(s, str.encode(outfile), debug)## send filename to server to check if it exist
-#        in_server = framedReceive(s, debug) ## Receive boolean if file exist in server
-#        in_server = in_server.decode()
-#        if in_server == "True":
-#           print("Already exist on server.")
-#           sys.exit(0)
-#        else:
-#            framedSend(s, str.encode(file_data), debug)##if file isnt already on server send data
-     #       #server_read = framedReceive(s, debug)## receive what data was copied into server
-     #       #server_read = server_read.decode()
-#            print("Server has received %s and wrote its contents to file." % outfile)
-#            s.close()
-
-#else:
-#    print("Sorry cant find %s or doesnt exist" % outfile)
-#    sys.exit(0)
-    
-    
-#sentFiles = []
-#files = ["testfile.txt", "file1.txt", "emptyfile.txt", "file3.txt", "file1.txt", "nonexistentFile.txt","code.py"]
-
-
-#def is_empty_file(filename):
-#    return os.path.isfile(filename) and os.path.getsize(filename) 
-#
-#for file in files:
-#    if is_empty_file(file) == False:
-#        print("'%s' did not send because it is an empty file\n" % file)
-#        pass
-#    else:
-#        if file in sentFiles: ## check file has been send already.
-#            print("'%s' tried to send but already has been sent to server." % file)
-#            pass
-#        else: ## send file to server
-#            print("Sending File %s to Server:" % file)
-#            sentFiles.append(file)## add filename to sent list
-#            framedSend(s, str.encode(file),debug)##Send Filename to server
-#            #sentFiles.append(file) ## add filename to sentFile list
-#            try: ## try to open file but handle if file does not exist
-#                quitMsg = "exit"
-#                with open(file) as f: ## open file
-#                    for line in f:
-#                        framedSend(s, str.encode(line),debug)
-#                        print("Server Received: ",framedReceive(s,debug))
-#                    print("Server Coppied: '%s'\n" % file)
-#                framedSend(s,str.encode(quitMsg),debug)
-#                f.close()
-#            except IOError:
-#                print("'%s' could not be open because it dosnt exist" % file)
-#
-#f.close()
-#s.close() ## no more files to send close socket.
-        
+#    sys.exit(0#)

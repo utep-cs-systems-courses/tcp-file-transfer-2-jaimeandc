@@ -62,7 +62,7 @@ for i in range(1):
                 sys.exit(0)
             else:
                 fsock.send(payload,debug)
-                print("serverSAYS ", fsock.receive(debug).decode())
+                print("Server says:  ", fsock.receive(debug).decode())
     else:
         print("File '%s' dosnt exist." % filename)
     

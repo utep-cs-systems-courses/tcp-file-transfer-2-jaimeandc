@@ -37,27 +37,24 @@ class Server(Thread):
         print("new thread handling connection from", self.addr)
         while True:
             filename = self.fsock.receive(debug)
-            print("checking server for : ", filename.decode())
+            print("checking server for : ", filename)
             newfile = filename.decode()
             newfile = "new"+newfile
-            print(newfile)
+            print("'%s' has been saved to server files as: '%s'." % (filename,newfile))
             if exists(newfile):
                 self.fsock.send(b"True",debug)
             else:
                 self.fsock.send(b"False", debug)
                 payload = self.fsock.receive(debug)
+                if debug: print("rec'd: ",payload)
+                if not payload:
+                    if debug: print(f"thread connected to {addr} done")
+                    self.fsock.close()
+                    return
                 outfile = open(newfile,"wb")
                 outfile.write(filename)
                 outfile.write(payload)
-                self.fsock.send(b"wrote new file",debug)
-            ##payload = self.fsock.receive(debug)
-            #if debug: print("rec'd: ",payload)
-            #if not payload:
-            #    if debug: print(f"thread connected to {addr} done")
-            #    self.fsock.close()
-            #    return
-            #payload += b"!"
-            #self.fsock.send(payload, debug)
+                self.fsock.send(b"file saved to server",debug)
 while True:
     sockAddr = lsock.accept()
     server = Server(sockAddr)

@@ -60,6 +60,9 @@ for i in range(1):
             if file_exists == 'True':
                 print("That file exits all ready")
                 sys.exit(0)
+            elif file_exists == 'exists': ##
+                print("Someones already writing this to the server. Try again later") ##
+                sys.exit(0)
             else:
                 fsock.send(payload,debug)
                 print("Server says:  ", fsock.receive(debug).decode())

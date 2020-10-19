@@ -42,7 +42,7 @@ sock.connect(addrPort)
 
 fsock = EncapFramedSock((sock, addrPort))
 for i in range(1):
-    filename = input("ENTER SOMTHING")
+    filename = input("Enter filename: ")
 #    file = open(filename,'rb')
 #    payload = file.read()
     
